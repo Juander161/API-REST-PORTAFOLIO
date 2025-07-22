@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 const ejercicioEsquema = mongoose.Schema({
-    nombre: {
+    Nombre: {
     type: String,
     required: true
     },
