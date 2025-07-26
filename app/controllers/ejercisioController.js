@@ -1,4 +1,4 @@
-const ejercicioModel = require("../models/ejercisioModel");
+const ejercicioModel = require("../models/usuarioModel");
 
 function buscarTodo(req, res) {
     ejercicioModel.find({})
