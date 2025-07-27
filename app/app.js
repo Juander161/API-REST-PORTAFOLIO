@@ -61,20 +61,9 @@ app.use("/api/mascotas", mascotaRoutes)
 app.use("/api/historiales", historialRoutes)
 app.use("/api/citas", citaRoutes)
 
-// Ruta de bienvenida
+// Redirigir la ruta principal a Swagger
 app.get("/", (req, res) => {
-  res.json({
-    mensaje: "¡Bienvenido a la API de Clínica Veterinaria Patitas Felices!",
-    version: "1.0.0",
-    endpoints: {
-      auth: "/api/auth",
-      usuarios: "/api/usuarios",
-      mascotas: "/api/mascotas",
-      historiales: "/api/historiales",
-      citas: "/api/citas",
-    },
-    documentacion: "/api-docs",
-  })
+  res.redirect("/api-docs")
 })
 
 // Manejo de errores 404
