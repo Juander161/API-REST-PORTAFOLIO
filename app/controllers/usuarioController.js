@@ -1,136 +1,100 @@
-const ejercicioModel = require("../models/usuarioModel");
+const Usuario = require("../models/usuarioModel")
 
-function buscarTodo(req, res) {
-    ejercicioModel.find({})
-        .then(ejercisios => {
-            if (ejercisios.length) {
-                return res.status(200).send({ ejercisios });
-            }
-            return res.status(204).send({ mensaje: "No hay información para mostrar" });
-        })
-        .catch(error => {
-            console.error("Error al buscar ejercicios:", error);
-            return res.status(500).send({ mensaje: "Error interno al mostrar la información", error: error.message });
-        });
+const obtenerUsuarios = async (req, res) => {
+  try {
+    const usuarios = await Usuario.find({}).select("-password").populate("mascotas")
+
+    if (!usuarios.length) {
+      return res.status(204).json({
+        mensaje: "No hay usuarios registrados",
+      })
+    }
+
+    res.status(200).json({
+      mensaje: "Usuarios obtenidos exitosamente",
+      usuarios,
+    })
+  } catch (error) {
+    res.status(500).json({
+      mensaje: "Error al obtener usuarios",
+      error: error.message,
+    })
+  }
 }
 
-function guardarEjercicio(req, res) {
-    console.log(req.body);
-    new ejercicioModel(req.body).save()
-        .then(info => {
-            return res.status(200).send({ mensaje: "Información guardada con éxito", info });
-        })
-        .catch(e => {
-            console.error("Error al guardar ejercicio:", e);
-            return res.status(500).send({ mensaje: "Error interno al guardar la información", error: e.message });
-        });
+const obtenerUsuario = async (req, res) => {
+  try {
+    const usuario = await Usuario.findById(req.params.id).select("-password").populate("mascotas")
+
+    if (!usuario) {
+      return res.status(404).json({
+        mensaje: "Usuario no encontrado",
+      })
+    }
+
+    res.status(200).json({
+      mensaje: "Usuario obtenido exitosamente",
+      usuario,
+    })
+  } catch (error) {
+    res.status(500).json({
+      mensaje: "Error al obtener usuario",
+      error: error.message,
+    })
+  }
 }
 
-function buscarEjercicio(req, res, next) {
-    let consulta = {};
-    consulta[req.params.key] = req.params.value;
+const actualizarUsuario = async (req, res) => {
+  try {
+    const { password, ...datosActualizacion } = req.body
 
-    ejercicioModel.find(consulta)
-        .then(info => {
-            if (!info.length) return next();
-            req.body.ejercicios = info;
-            return next();
-        })
-        .catch(e => {  // Corregido: .cath -> .catch
-            req.body.error = e;
-            return next();
-        });
+    const usuario = await Usuario.findByIdAndUpdate(req.params.id, datosActualizacion, {
+      new: true,
+      runValidators: true,
+    }).select("-password")
+
+    if (!usuario) {
+      return res.status(404).json({
+        mensaje: "Usuario no encontrado",
+      })
+    }
+
+    res.status(200).json({
+      mensaje: "Usuario actualizado exitosamente",
+      usuario,
+    })
+  } catch (error) {
+    res.status(500).json({
+      mensaje: "Error al actualizar usuario",
+      error: error.message,
+    })
+  }
 }
 
-function mostrarEjercicio(req, res) {
-    if (req.body.error) {
-        return res.status(500).send({
-            mensaje: "Error al buscar ejercicios",
-            error: req.body.error.message
-        });
+const eliminarUsuario = async (req, res) => {
+  try {
+    const usuario = await Usuario.findByIdAndDelete(req.params.id)
+
+    if (!usuario) {
+      return res.status(404).json({
+        mensaje: "Usuario no encontrado",
+      })
     }
 
-    if (!req.body.ejercicios || !req.body.ejercicios.length) {
-        return res.status(204).send({
-            mensaje: "No hay información para mostrar"
-        });
-    }
-
-    return res.status(200).send({
-        ejercicios: req.body.ejercicios
-    });
-}
-
-function actualizarEjercicio(req, res) {
-    req.body = req.body || {};
-
-    if (req.body.e) {
-        return res.status(404).send({
-            mensaje: "Error al buscar la información",
-            error: req.body.e
-        });
-    }
-
-    if (!req.body.ejercicios || !req.body.ejercicios.length) {
-        return res.status(204).send({
-            mensaje: "No hay información que actualizar"
-        });
-    }
-
-    let ejercicio = req.body.ejercicios[0];
-
-    Object.assign(ejercicio, req.body);
-
-    ejercicio.save()
-        .then(info => {
-            return res.status(200).send({
-                mensaje: "Información actualizada con éxito",
-                info
-            });
-        })
-        .catch(e => {
-            return res.status(404).send({
-                mensaje: "Error al actualizar la información",
-                e
-            });
-        });
-}
-
-
-function eliminarEjercicio(req, res) {
-    if (req.body.e) {
-        return res.status(404).send({
-            mensaje: "Error al buscar la informacion",
-            error: req.body.e
-        });
-    }
-
-    if (!req.body.ejercicios || !req.body.ejercicios.length) {
-        return res.status(204).send({
-            mensaje: "No hay informacion que mostrar"
-        });
-    }
-
-    req.body.ejercicios[0].deleteOne()
-        .then(info => {
-            return res.status(200).send({
-                mensaje: "Informacion eliminada con exito",
-                info
-            });
-        })
-        .catch(e => {
-            return res.status(404).send({
-                mensaje: "Error al eliminar la informacion",
-                e
-            });
-        });
+    res.status(200).json({
+      mensaje: "Usuario eliminado exitosamente",
+    })
+  } catch (error) {
+    res.status(500).json({
+      mensaje: "Error al eliminar usuario",
+      error: error.message,
+    })
+  }
 }
 
 module.exports = {
-    buscarTodo,
-    guardarEjercicio,
-    buscarEjercicio,
-    mostrarEjercicio,
-    actualizarEjercicio,
-    eliminarEjercicio
-};
+  obtenerUsuarios,
+  obtenerUsuario,
+  actualizarUsuario,
+  eliminarUsuario,
+}
