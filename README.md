@@ -52,6 +52,13 @@ npm run dev
 npm start
 ```
 
+6. **Usuario Administrador por Defecto**
+Al iniciar el servidor por primera vez, se creará automáticamente un usuario administrador con las siguientes credenciales:
+- **Email**: admin@clinica.com
+- **Password**: admin123456
+
+⚠️ **IMPORTANTE**: Cambia estas credenciales después del primer login por seguridad.
+
 ## 📚 Endpoints de la API
 
 ### Autenticación
@@ -101,6 +108,21 @@ Authorization: Bearer <tu_token_jwt>
 - **Recepcionista**: Puede ver usuarios y gestionar citas
 - **Admin**: Acceso completo a todas las funcionalidades
 
+### 🔑 Usuario Administrador por Defecto
+El sistema crea automáticamente un usuario administrador al iniciar por primera vez:
+
+```
+Email: admin@clinica.com
+Password: admin123456
+```
+
+**Permisos del Admin:**
+- ✅ Gestionar todos los usuarios (crear, leer, actualizar, eliminar)
+- ✅ Gestionar todas las mascotas
+- ✅ Gestionar todos los historiales médicos
+- ✅ Gestionar todas las citas
+- ✅ Acceso completo a todas las funcionalidades del sistema
+
 ## 📖 Documentación Swagger
 
 Una vez que la aplicación esté ejecutándose, puedes acceder a la documentación interactiva en:
@@ -146,6 +168,16 @@ curl -X POST http://localhost:3000/api/auth/login \
   -d '{
     "email": "juan@example.com",
     "password": "123456"
+  }'
+```
+
+### Login como Administrador
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "admin@clinica.com",
+    "password": "admin123456"
   }'
 ```
 
