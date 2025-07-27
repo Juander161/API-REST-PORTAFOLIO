@@ -1,17 +1,21 @@
 const mongoose = require("mongoose") 
 const config = require("./configuracion");
 
-module.exports = {
-    connecction: null,
-    connect: () => {
-        if(this.connecction) return this.connecction;
-        return mongoose.connect(config.DB)
-        .then(conn => {
-            this.connecction = conn;
-            console.log("conexion exitosa");
-        })
-        .catch(e => {
-            console.log("error de conexion");
-        });
+const conexion = {
+    connection: null,
+    connect: async () => {
+        if(conexion.connection) return conexion.connection;
+        
+        try {
+            const conn = await mongoose.connect(config.DB);
+            conexion.connection = conn;
+            console.log("✅ Conexión a MongoDB exitosa");
+            return conn;
+        } catch (error) {
+            console.error("❌ Error de conexión a MongoDB:", error.message);
+            throw error;
+        }
     }
 };
+
+module.exports = conexion;

@@ -1,4 +1,4 @@
-const LogAcceso = require("../models/logAccesoModel")
+const LogAcceso = require("../models/logAccesModel")
 
 const logAccess = async (req, res, next) => {
   const originalSend = res.send

@@ -1,5 +1,7 @@
 const express = require("express")
 const cors = require("cors")
+const swaggerJsdoc = require("swagger-jsdoc")
+const swaggerUi = require("swagger-ui-express")
 const app = express()
 
 // Middleware
@@ -11,12 +13,46 @@ app.use(express.json())
 const logAccess = require("./middleware/logger")
 app.use(logAccess)
 
+// Configuración de Swagger
+const swaggerOptions = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "API Clínica Veterinaria Patitas Felices",
+      version: "1.0.0",
+      description: "API REST para gestión de clínica veterinaria",
+      contact: {
+        name: "Juan de Dios Valero Casillas",
+      },
+    },
+    servers: [
+      {
+        url: "http://localhost:3000",
+        description: "Servidor de desarrollo",
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+  },
+  apis: ["./app/routes/*.js", "./app/controllers/*.js"],
+}
+
+const specs = swaggerJsdoc(swaggerOptions)
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs))
+
 // Rutas
-const authRoutes = require("./routes/authRoutes")
-const usuarioRoutes = require("./routes/usuarioRoutes")
-const mascotaRoutes = require("./routes/mascotaRoutes")
-const historialRoutes = require("./routes/historialRoutes")
-const citaRoutes = require("./routes/citaRoutes")
+const authRoutes = require("./routes/authRouter")
+const usuarioRoutes = require("./routes/usuariorouter")
+const mascotaRoutes = require("./routes/mascotaRouter")
+const historialRoutes = require("./routes/historialRouter")
+const citaRoutes = require("./routes/citasRouter")
 
 // Usar rutas
 app.use("/api/auth", authRoutes)
@@ -37,6 +73,7 @@ app.get("/", (req, res) => {
       historiales: "/api/historiales",
       citas: "/api/citas",
     },
+    documentacion: "/api-docs",
   })
 })
 
