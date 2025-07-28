@@ -20,6 +20,8 @@ API REST completa para la gestión de una clínica veterinaria con autenticació
 
 ## 🛠️ Instalación
 
+### Opción 1: Instalación Local
+
 1. **Clonar el repositorio**
 ```bash
 git clone <url-del-repositorio>
@@ -52,7 +54,39 @@ npm run dev
 npm start
 ```
 
-6. **Usuario Administrador por Defecto**
+### Opción 2: Instalación con Docker (Recomendado)
+
+1. **Clonar el repositorio**
+```bash
+git clone <url-del-repositorio>
+cd API-REST-PORTAFOLIO
+```
+
+2. **Dar permisos de ejecución a los scripts**
+```bash
+chmod +x docker-start.sh docker-stop.sh
+```
+
+3. **Iniciar con Docker**
+```bash
+# Iniciar todos los servicios
+./docker-start.sh
+
+# O manualmente
+docker-compose up --build -d
+```
+
+4. **Verificar que los servicios estén funcionando**
+```bash
+docker-compose ps
+```
+
+5. **Acceder a la aplicación**
+- API: http://localhost:3000
+- Documentación Swagger: http://localhost:3000/api-docs
+- Con Nginx: http://localhost:80
+
+### Usuario Administrador por Defecto
 Al iniciar el servidor por primera vez, se creará automáticamente un usuario administrador con las siguientes credenciales:
 - **Email**: admin@clinica.com
 - **Password**: admin123456
@@ -195,19 +229,71 @@ curl -X POST http://localhost:3000/api/mascotas \
   }'
 ```
 
+## 🐳 Comandos Docker Útiles
+
+### Gestión de Contenedores
+```bash
+# Iniciar servicios
+docker-compose up -d
+
+# Detener servicios
+docker-compose down
+
+# Ver logs en tiempo real
+docker-compose logs -f
+
+# Ver logs de un servicio específico
+docker-compose logs -f api
+docker-compose logs -f mongodb
+
+# Reconstruir y reiniciar
+docker-compose up --build -d
+
+# Ver estado de los contenedores
+docker-compose ps
+
+# Acceder al contenedor de la API
+docker-compose exec api sh
+
+# Acceder a MongoDB
+docker-compose exec mongodb mongosh
+```
+
+### Limpieza
+```bash
+# Detener y eliminar contenedores
+docker-compose down
+
+# Eliminar también volúmenes (¡CUIDADO! Esto elimina la base de datos)
+docker-compose down -v
+
+# Eliminar imágenes también
+docker-compose down --rmi all
+
+# Limpiar todo (contenedores, imágenes, volúmenes no utilizados)
+docker system prune -a
+```
+
 ## 🐛 Solución de Problemas
 
 ### Error de conexión a MongoDB
 - Verifica que MongoDB esté ejecutándose
 - Revisa la URL de conexión en el archivo `.env`
+- En Docker: verifica que el contenedor de MongoDB esté funcionando
 
 ### Error de módulos no encontrados
 - Ejecuta `npm install` para instalar todas las dependencias
 - Verifica que todas las rutas de importación sean correctas
+- En Docker: reconstruye la imagen con `docker-compose up --build -d`
 
 ### Error de autenticación
 - Verifica que el token JWT sea válido
 - Asegúrate de incluir el header `Authorization: Bearer <token>`
+
+### Problemas con Docker
+- Verifica que Docker y Docker Compose estén instalados
+- Asegúrate de que los puertos 3000, 27017 y 80 estén disponibles
+- Revisa los logs con `docker-compose logs -f`
 
 ## 📝 Notas de Desarrollo
 

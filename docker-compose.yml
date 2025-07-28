@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # Base de datos MongoDB
+  mongodb:
+    image: mongo:6.0
+    container_name: clinica_mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: clinica_veterinaria
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
+    networks:
+      - clinica_network
+
+  # API REST
+  api:
+    build: .
+    container_name: clinica_api
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DB=mongodb://admin:password123@mongodb:27017/clinica_veterinaria?authSource=admin
+      - JWT_SECRET=mi_secreto_jwt_super_seguro_2024_clinica_veterinaria_docker
+      - JWT_EXPIRE=24h
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    networks:
+      - clinica_network
+    volumes:
+      - ./logs:/app/logs
+
+  # Nginx como proxy reverso (opcional)
+  nginx:
+    image: nginx:alpine
+    container_name: clinica_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - api
+    networks:
+      - clinica_network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  clinica_network:
+    driver: bridge 
