@@ -19,15 +19,11 @@ const obtenerCitas = async (req, res) => {
       .populate("id_veterinario", "nombre email telefono")
       .sort({ fecha_hora: 1 })
 
-    if (!citas.length) {
-      return res.status(204).json({
-        mensaje: "No hay citas programadas",
-      })
-    }
-
     res.status(200).json({
-      mensaje: "Citas obtenidas exitosamente",
-      citas,
+      success: true,
+      mensaje: citas.length > 0 ? "Citas obtenidas exitosamente" : "No hay citas programadas",
+      citas: citas,
+      total: citas.length
     })
   } catch (error) {
     res.status(500).json({

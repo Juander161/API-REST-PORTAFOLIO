@@ -20,15 +20,11 @@ const obtenerHistoriales = async (req, res) => {
       },
     })
 
-    if (!historiales.length) {
-      return res.status(204).json({
-        mensaje: "No hay historiales médicos registrados",
-      })
-    }
-
     res.status(200).json({
-      mensaje: "Historiales obtenidos exitosamente",
-      historiales,
+      success: true,
+      mensaje: historiales.length > 0 ? "Historiales obtenidos exitosamente" : "No hay historiales médicos registrados",
+      historiales: historiales,
+      total: historiales.length
     })
   } catch (error) {
     res.status(500).json({

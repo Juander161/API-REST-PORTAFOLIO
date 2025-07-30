@@ -5,6 +5,10 @@ const inicializarAdmin = require("./app/config/initAdmin")
 
 const iniciarServidor = async () => {
   try {
+    console.log("🚀 Iniciando servidor...")
+    console.log(`📡 Puerto configurado: ${config.PORT}`)
+    console.log(`🗄️ Base de datos configurada: ${config.DB ? 'Sí' : 'No'}`)
+    
     // Conectar a la base de datos
     await conexion.connect()
     

@@ -29,8 +29,19 @@ services:
       - DB=mongodb://admin:password123@mongodb:27017/clinica_veterinaria?authSource=admin
       - JWT_SECRET=mi_secreto_jwt_super_seguro_2024_clinica_veterinaria_docker
       - JWT_EXPIRE=24h
+      - CORS_ORIGIN=*
+      - LOG_LEVEL=info
+      - SESSION_SECRET=session_secret_clinica_veterinaria_docker
+      - ENABLE_METRICS=false
+      - ENABLE_COMPRESSION=true
+      - ENABLE_HELMET=true
+      - ENABLE_RATE_LIMIT=true
+      - ENABLE_VALIDATION=true
+      - ENABLE_SANITIZATION=true
+      - TIMEZONE=America/Mexico_City
+      - LOCALE=es-MX
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - mongodb
     networks:

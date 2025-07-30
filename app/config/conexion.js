@@ -6,6 +6,13 @@ const conexion = {
     connect: async () => {
         if(conexion.connection) return conexion.connection;
         
+        // Verificar que la configuración de DB esté disponible
+        if (!config.DB) {
+            throw new Error("❌ Error: La configuración de la base de datos (DB) no está definida");
+        }
+        
+        console.log(`🔗 Intentando conectar a MongoDB: ${config.DB}`);
+        
         try {
             const conn = await mongoose.connect(config.DB);
             conexion.connection = conn;

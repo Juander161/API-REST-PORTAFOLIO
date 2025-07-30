@@ -14,15 +14,11 @@ const obtenerMascotas = async (req, res) => {
       .populate("id_propietario", "nombre email telefono")
       .populate("historial_medico")
 
-    if (!mascotas.length) {
-      return res.status(204).json({
-        mensaje: "No hay mascotas registradas",
-      })
-    }
-
     res.status(200).json({
-      mensaje: "Mascotas obtenidas exitosamente",
-      mascotas,
+      success: true,
+      mensaje: mascotas.length > 0 ? "Mascotas obtenidas exitosamente" : "No hay mascotas registradas",
+      mascotas: mascotas,
+      total: mascotas.length
     })
   } catch (error) {
     res.status(500).json({

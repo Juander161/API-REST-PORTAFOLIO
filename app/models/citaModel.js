@@ -22,7 +22,7 @@ const citaEsquema = mongoose.Schema({
   },
   estado: {
     type: String,
-    enum: ["Programada", "Completada", "Cancelada"],
+    enum: ["Programada", "Confirmada", "Completada", "Cancelada"],
     default: "Programada",
   },
   notas: {

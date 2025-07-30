@@ -4,15 +4,11 @@ const obtenerUsuarios = async (req, res) => {
   try {
     const usuarios = await Usuario.find({}).select("-password").populate("mascotas")
 
-    if (!usuarios.length) {
-      return res.status(204).json({
-        mensaje: "No hay usuarios registrados",
-      })
-    }
-
     res.status(200).json({
-      mensaje: "Usuarios obtenidos exitosamente",
-      usuarios,
+      success: true,
+      mensaje: usuarios.length > 0 ? "Usuarios obtenidos exitosamente" : "No hay usuarios registrados",
+      usuarios: usuarios,
+      total: usuarios.length
     })
   } catch (error) {
     res.status(500).json({

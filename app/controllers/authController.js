@@ -38,6 +38,7 @@ const registro = async (req, res) => {
     const token = generarToken(usuario._id)
 
     res.status(201).json({
+      success: true,
       mensaje: "Usuario registrado exitosamente",
       usuario: {
         id: usuario._id,
@@ -82,6 +83,7 @@ const login = async (req, res) => {
     const token = generarToken(usuario._id)
 
     res.status(200).json({
+      success: true,
       mensaje: "Login exitoso",
       usuario: {
         id: usuario._id,
@@ -109,6 +111,7 @@ const obtenerPerfil = async (req, res) => {
       .populate("mascotas")
 
     res.status(200).json({
+      success: true,
       mensaje: "Perfil obtenido exitosamente",
       usuario,
     })
