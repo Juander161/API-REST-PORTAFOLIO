@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const bcrypt = require("bcryptjs")
+const config = require("../config/configuracion")
 
 const usuarioEsquema = mongoose.Schema({
   nombre: {
@@ -47,7 +48,7 @@ const usuarioEsquema = mongoose.Schema({
 // Encriptar password antes de guardar
 usuarioEsquema.pre("save", async function (next) {
   if (!this.isModified("password")) return next()
-  this.password = await bcrypt.hash(this.password, 12)
+  this.password = await bcrypt.hash(this.password, config.BCRYPT_ROUNDS)
   next()
 })
 

@@ -30,7 +30,9 @@ const config = {
   JWT_EXPIRE: getEnvVar('JWT_EXPIRE', '24h'),
   
   // Configuración de CORS
-  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
+  CORS_ORIGIN: process.env.CORS_ORIGIN ? 
+    process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()) : 
+    (process.env.NODE_ENV === 'production' ? ['https://tu-dominio.com'] : ['http://localhost:3000', 'http://127.0.0.1:5501', 'http://localhost:5501']),
   
   // Configuración de logging
   LOG_LEVEL: process.env.LOG_LEVEL || 'info',
@@ -52,7 +54,7 @@ const config = {
   
   // Configuración de rate limiting (opcional)
   RATE_LIMIT_WINDOW_MS: 15 * 60 * 1000, // 15 minutos
-  RATE_LIMIT_MAX_REQUESTS: 100, // máximo 100 requests por ventana
+  RATE_LIMIT_MAX_REQUESTS: 1000, // máximo 100 requests por ventana
   
   // Configuración de sesiones (si se implementa en el futuro)
   SESSION_SECRET: process.env.SESSION_SECRET || 'session_secret_clinica_veterinaria',
@@ -197,11 +199,17 @@ const config = {
   }
 }
 
+// Validar seguridad de los secretos
+const { validateSecrets } = require('../utils/security')
+
 // Logs de depuración para verificar la configuración
 console.log('🔧 Configuración cargada:')
 console.log(`   NODE_ENV: ${config.NODE_ENV}`)
 console.log(`   PORT: ${config.PORT}`)
 console.log(`   DB: ${config.DB}`)
 console.log(`   JWT_SECRET: ${config.JWT_SECRET ? 'Configurado' : 'No configurado'}`)
+
+// Validar secretos de seguridad
+validateSecrets(config)
 
 module.exports = config

@@ -4,13 +4,17 @@
 // Crear la base de datos y usuario
 db = db.getSiblingDB('clinica_veterinaria');
 
-// Crear usuario para la aplicación
+// Crear usuario para la aplicación (coincide con docker-compose.yml)
 db.createUser({
-  user: 'clinica_user',
-  pwd: 'clinica_password',
+  user: 'admin',
+  pwd: 'password123',
   roles: [
     {
       role: 'readWrite',
+      db: 'clinica_veterinaria'
+    },
+    {
+      role: 'dbAdmin',
       db: 'clinica_veterinaria'
     }
   ]
@@ -24,4 +28,4 @@ db.createCollection('citas');
 db.createCollection('logs_acceso');
 
 print('Base de datos clinica_veterinaria inicializada correctamente');
-print('Usuario clinica_user creado con permisos de lectura/escritura'); 
+print('Usuario admin creado con permisos de lectura/escritura y administración'); 

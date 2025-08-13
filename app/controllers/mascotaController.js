@@ -1,157 +1,163 @@
 const Mascota = require("../models/mascotaModel")
 const Usuario = require("../models/usuarioModel")
+const { createSuccessResponse, createErrorResponse, asyncHandler } = require("../middleware/errorHandler")
+const config = require("../config/configuracion")
 
-const obtenerMascotas = async (req, res) => {
-  try {
-    const filtro = {}
+const obtenerMascotas = asyncHandler(async (req, res) => {
+  const filtro = {}
 
-    // Si es cliente, solo puede ver sus mascotas
-    if (req.usuario.rol === "cliente") {
-      filtro.id_propietario = req.usuario._id
-    }
-
-    const mascotas = await Mascota.find(filtro)
-      .populate("id_propietario", "nombre email telefono")
-      .populate("historial_medico")
-
-    res.status(200).json({
-      success: true,
-      mensaje: mascotas.length > 0 ? "Mascotas obtenidas exitosamente" : "No hay mascotas registradas",
-      mascotas: mascotas,
-      total: mascotas.length
-    })
-  } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al obtener mascotas",
-      error: error.message,
-    })
+  // Si es cliente, solo puede ver sus mascotas
+  if (req.usuario.rol === "cliente") {
+    filtro.id_propietario = req.usuario._id
   }
-}
 
-const crearMascota = async (req, res) => {
-  try {
-    // Si es cliente, solo puede crear mascotas para sí mismo
-    if (req.usuario.rol === "cliente") {
+  const mascotas = await Mascota.find(filtro)
+    .populate("id_propietario", "nombre email telefono")
+    .populate("historial_medico")
+
+  const meta = {
+    total: mascotas.length
+  }
+
+  res.status(200).json(
+    createSuccessResponse(
+      mascotas.length > 0 ? "Mascotas obtenidas exitosamente" : "No hay mascotas registradas",
+      { mascotas },
+      meta
+    )
+  )
+})
+
+const crearMascota = asyncHandler(async (req, res) => {
+  // Si es cliente, solo puede crear mascotas para sí mismo
+  if (req.usuario.rol === "cliente") {
+    req.body.id_propietario = req.usuario._id
+  } else {
+    // Para admin/veterinario, si no se proporciona id_propietario, usar el del usuario actual
+    if (!req.body.id_propietario) {
       req.body.id_propietario = req.usuario._id
     }
-
-    const nuevaMascota = new Mascota(req.body)
-    await nuevaMascota.save()
-
-    // Agregar mascota al array del propietario
-    await Usuario.findByIdAndUpdate(req.body.id_propietario, { $push: { mascotas: nuevaMascota._id } })
-
-    const mascotaCompleta = await Mascota.findById(nuevaMascota._id).populate("id_propietario", "nombre email telefono")
-
-    res.status(201).json({
-      mensaje: "Mascota registrada exitosamente",
-      mascota: mascotaCompleta,
-    })
-  } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al registrar mascota",
-      error: error.message,
-    })
   }
-}
 
-const obtenerMascota = async (req, res) => {
-  try {
-    const mascota = await Mascota.findById(req.params.id)
-      .populate("id_propietario", "nombre email telefono")
-      .populate("historial_medico")
-
-    if (!mascota) {
-      return res.status(404).json({
-        mensaje: "Mascota no encontrada",
-      })
-    }
-
-    // Verificar permisos
-    if (req.usuario.rol === "cliente" && mascota.id_propietario._id.toString() !== req.usuario._id.toString()) {
-      return res.status(403).json({
-        mensaje: "No tienes permisos para ver esta mascota",
-      })
-    }
-
-    res.status(200).json({
-      mensaje: "Mascota obtenida exitosamente",
-      mascota,
-    })
-  } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al obtener mascota",
-      error: error.message,
-    })
+  // Verificar que el propietario existe
+  const propietario = await Usuario.findById(req.body.id_propietario)
+  if (!propietario) {
+    return res.status(404).json(
+      createErrorResponse(config.ERROR_MESSAGES.USER_NOT_FOUND, null, 404)
+    )
   }
-}
 
-const actualizarMascota = async (req, res) => {
-  try {
-    const mascota = await Mascota.findById(req.params.id)
+  // Crear mascota sin historial médico por ahora
+  const nuevaMascota = new Mascota(req.body)
+  await nuevaMascota.save()
 
-    if (!mascota) {
-      return res.status(404).json({
-        mensaje: "Mascota no encontrada",
-      })
-    }
-
-    // Verificar permisos
-    if (req.usuario.rol === "cliente" && mascota.id_propietario.toString() !== req.usuario._id.toString()) {
-      return res.status(403).json({
-        mensaje: "No tienes permisos para actualizar esta mascota",
-      })
-    }
-
-    const mascotaActualizada = await Mascota.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    }).populate("id_propietario", "nombre email telefono")
-
-    res.status(200).json({
-      mensaje: "Mascota actualizada exitosamente",
-      mascota: mascotaActualizada,
-    })
-  } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al actualizar mascota",
-      error: error.message,
-    })
+  // Agregar mascota al array del propietario
+  if (!propietario.mascotas) {
+    propietario.mascotas = []
   }
-}
+  propietario.mascotas.push(nuevaMascota._id)
+  await propietario.save()
 
-const eliminarMascota = async (req, res) => {
+  // Obtener mascota completa
+  const mascotaCompleta = await Mascota.findById(nuevaMascota._id)
+    .populate("id_propietario", "nombre email telefono")
+
+  res.status(201).json(
+    createSuccessResponse(config.SUCCESS_MESSAGES.MASCOTA_CREATED, { mascota: mascotaCompleta })
+  )
+})
+
+const obtenerMascota = asyncHandler(async (req, res) => {
+  const mascota = await Mascota.findById(req.params.id)
+    .populate("id_propietario", "nombre email telefono")
+    .populate("historial_medico")
+
+  if (!mascota) {
+    return res.status(404).json(
+      createErrorResponse(config.ERROR_MESSAGES.MASCOTA_NOT_FOUND)
+    )
+  }
+
+  // Verificar permisos
+  if (req.usuario.rol === "cliente" && mascota.id_propietario._id.toString() !== req.usuario._id.toString()) {
+    return res.status(403).json(
+      createErrorResponse(config.ERROR_MESSAGES.FORBIDDEN)
+    )
+  }
+
+  res.status(200).json(
+    createSuccessResponse("Mascota obtenida exitosamente", { mascota })
+  )
+})
+
+const actualizarMascota = asyncHandler(async (req, res) => {
+  const mascota = await Mascota.findById(req.params.id)
+
+  if (!mascota) {
+    return res.status(404).json(
+      createErrorResponse(config.ERROR_MESSAGES.MASCOTA_NOT_FOUND)
+    )
+  }
+
+  // Verificar permisos
+  if (req.usuario.rol === "cliente" && mascota.id_propietario.toString() !== req.usuario._id.toString()) {
+    return res.status(403).json(
+      createErrorResponse(config.ERROR_MESSAGES.FORBIDDEN)
+    )
+  }
+
+  const mascotaActualizada = await Mascota.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  }).populate("id_propietario", "nombre email telefono")
+    .populate("historial_medico")
+
+  res.status(200).json(
+    createSuccessResponse(config.SUCCESS_MESSAGES.MASCOTA_UPDATED, { mascota: mascotaActualizada })
+  )
+})
+
+const eliminarMascota = asyncHandler(async (req, res) => {
+  const mascota = await Mascota.findById(req.params.id)
+
+  if (!mascota) {
+    return res.status(404).json(
+      createErrorResponse(config.ERROR_MESSAGES.MASCOTA_NOT_FOUND, null, 404)
+    )
+  }
+
+  // Solo admin y veterinarios pueden eliminar mascotas
+  if (!["admin", "veterinario"].includes(req.usuario.rol)) {
+    return res.status(403).json(
+      createErrorResponse(config.ERROR_MESSAGES.FORBIDDEN, null, 403)
+    )
+  }
+
   try {
-    const mascota = await Mascota.findById(req.params.id)
+    // 1. Eliminar historial médico si existe
+    const Historial = require("../models/historialModel")
+    await Historial.findOneAndDelete({ id_mascota: mascota._id })
 
-    if (!mascota) {
-      return res.status(404).json({
-        mensaje: "Mascota no encontrada",
-      })
-    }
-
-    // Solo admin y veterinarios pueden eliminar mascotas
-    if (!["admin", "veterinario"].includes(req.usuario.rol)) {
-      return res.status(403).json({
-        mensaje: "No tienes permisos para eliminar mascotas",
-      })
-    }
-
+    // 2. Eliminar mascota
     await Mascota.findByIdAndDelete(req.params.id)
 
-    // Remover mascota del array del propietario
-    await Usuario.findByIdAndUpdate(mascota.id_propietario, { $pull: { mascotas: mascota._id } })
+    // 3. Remover mascota del array del propietario
+    await Usuario.findByIdAndUpdate(
+      mascota.id_propietario, 
+      { $pull: { mascotas: mascota._id } }
+    )
 
-    res.status(200).json({
-      mensaje: "Mascota eliminada exitosamente",
-    })
+    res.status(200).json(
+      createSuccessResponse(config.SUCCESS_MESSAGES.MASCOTA_DELETED)
+    )
+
   } catch (error) {
-    res.status(500).json({
-      mensaje: "Error al eliminar mascota",
-      error: error.message,
-    })
+    console.error('Error al eliminar mascota:', error)
+    res.status(500).json(
+      createErrorResponse("Error al eliminar mascota: " + error.message, null, 500)
+    )
   }
-}
+})
 
 module.exports = {
   obtenerMascotas,
@@ -159,4 +165,4 @@ module.exports = {
   obtenerMascota,
   actualizarMascota,
   eliminarMascota,
-} 
+}

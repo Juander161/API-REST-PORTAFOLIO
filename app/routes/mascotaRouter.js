@@ -2,6 +2,7 @@ const express = require("express")
 const router = express.Router()
 const mascotaController = require("../controllers/mascotaController")
 const { auth } = require("../middleware/auth")
+const { validateObjectId } = require("../middleware/validation")
 
 router.use(auth) // Todas las rutas requieren autenticación
 
@@ -54,8 +55,9 @@ router.get("/", mascotaController.obtenerMascotas)
  *               - nombre
  *               - especie
  *               - raza
- *               - edad
- *               - peso
+ *               - fecha_nacimiento
+ *               - sexo
+ *               - color
  *             properties:
  *               nombre:
  *                 type: string
@@ -63,15 +65,27 @@ router.get("/", mascotaController.obtenerMascotas)
  *               especie:
  *                 type: string
  *                 description: Especie de la mascota
+ *                 enum: [Perro, Gato, Ave, Reptil, Roedor, Otro]
  *               raza:
  *                 type: string
  *                 description: Raza de la mascota
- *               edad:
- *                 type: number
- *                 description: Edad de la mascota en años
- *               peso:
- *                 type: number
- *                 description: Peso de la mascota en kg
+ *               fecha_nacimiento:
+ *                 type: string
+ *                 format: date
+ *                 description: Fecha de nacimiento de la mascota
+ *               sexo:
+ *                 type: string
+ *                 enum: [Macho, Hembra]
+ *                 description: Sexo de la mascota
+ *               color:
+ *                 type: string
+ *                 description: Color de la mascota
+ *               foto:
+ *                 type: string
+ *                 description: URL de la foto de la mascota
+ *               esterilizado:
+ *                 type: boolean
+ *                 description: Si la mascota está esterilizada
  *               id_propietario:
  *                 type: string
  *                 description: ID del propietario (automático si es cliente)
@@ -114,7 +128,7 @@ router.post("/", mascotaController.crearMascota)
  *       500:
  *         description: Error del servidor
  */
-router.get("/:id", mascotaController.obtenerMascota)
+router.get("/:id", validateObjectId(), mascotaController.obtenerMascota)
 
 /**
  * @swagger
@@ -160,7 +174,7 @@ router.get("/:id", mascotaController.obtenerMascota)
  *       500:
  *         description: Error del servidor
  */
-router.put("/:id", mascotaController.actualizarMascota)
+router.put("/:id", validateObjectId(), mascotaController.actualizarMascota)
 
 /**
  * @swagger
@@ -189,6 +203,6 @@ router.put("/:id", mascotaController.actualizarMascota)
  *       500:
  *         description: Error del servidor
  */
-router.delete("/:id", mascotaController.eliminarMascota)
+router.delete("/:id", validateObjectId(), mascotaController.eliminarMascota)
 
 module.exports = router

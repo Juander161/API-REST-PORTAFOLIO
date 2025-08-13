@@ -36,7 +36,7 @@ router.use(auth) // Todas las rutas requieren autenticación
  *       500:
  *         description: Error del servidor
  */
-router.get("/", authorize("admin", "recepcionista"), usuarioController.obtenerUsuarios)
+router.get("/", authorize("admin", "recepcionista", "veterinario"), usuarioController.obtenerUsuarios)
 
 /**
  * @swagger

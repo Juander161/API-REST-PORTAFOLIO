@@ -1,34 +1,67 @@
-node_modules
-npm-debug.log
-.git
-.gitignore
-README.md
+# Archivos que no deben copiarse al contenedor Docker
+
+# Dependencias (se instalan en el contenedor)
+node_modules/
+npm-debug.log*
+
+# Variables de entorno locales (usar env.docker)
 .env
-.env.local
-.env.development
-.env.test
-.env.production
-.nyc_output
-coverage
-.nyc_output
-.coverage
-.cache
-.DS_Store
-*.log
-logs
-*.pid
-*.seed
-*.pid.lock
-.npm
-.eslintcache
-.node_repl_history
-.yarn-integrity
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.vscode
-.idea
+
+# Logs locales
+logs/
+*.log
+
+# Archivos temporales
+.tmp/
+temp/
+*.tmp
+*.temp
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# IDEs y editores
+.vscode/
+.idea/
 *.swp
 *.swo
-*~ 
+
+# Git
+.git/
+.gitignore
+
+# Archivos de desarrollo
+README.md
+TROUBLESHOOTING.md
+docker-compose.dev.yml
+
+# Scripts de desarrollo local
+scripts/start-with-checks.js
+scripts/health-check.js
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de certificados SSL locales
+nginx/ssl/
+
+# Cache
+.cache/
+.parcel-cache/
+
+# Archivos de prueba
+test/
+tests/
+*.test.js
+*.spec.js
+
+# Documentación de desarrollo
+docs/
+*.md
+!README.md
