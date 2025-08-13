@@ -98,7 +98,7 @@ const config = {
   
   // Configuración de paginación
   DEFAULT_PAGE_SIZE: 10,
-  MAX_PAGE_SIZE: 100,
+  MAX_PAGE_SIZE: 200,
   
   // Configuración de cache (para futuras optimizaciones)
   CACHE_TTL: 300, // 5 minutos

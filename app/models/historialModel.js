@@ -10,15 +10,15 @@ const historialEsquema = mongoose.Schema({
     {
       nombre: {
         type: String,
-        required: true,
+        required: false,
       },
       fecha: {
         type: Date,
-        required: true,
+        required: false,
       },
       proxima_fecha: {
         type: Date,
-        required: true,
+        required: false,
       },
       lote: String,
       veterinario: String,
@@ -28,12 +28,12 @@ const historialEsquema = mongoose.Schema({
     {
       sustancia: {
         type: String,
-        required: true,
+        required: false,
       },
       gravedad: {
         type: String,
         enum: ["Leve", "Moderada", "Severa"],
-        required: true,
+        required: false,
       },
       reaccion: String,
     },
@@ -42,23 +42,23 @@ const historialEsquema = mongoose.Schema({
     {
       nombre: {
         type: String,
-        required: true,
+        required: false,
       },
       fecha: {
         type: Date,
-        required: true,
+        required: false,
       },
       veterinario: String,
       descripcion: String,
       complicaciones: String,
     },
   ],
-  enfermedades_cronicas: [String],
+  enfermedades_cronicas: [],
   medicamentos_actuales: [
     {
       nombre: {
         type: String,
-        required: true,
+        required: false,
       },
       dosis: String,
       frecuencia: String,
